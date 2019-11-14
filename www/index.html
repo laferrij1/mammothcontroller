@@ -1,0 +1,846 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        .placard {
+            font-size: 150%;
+        }
+
+        .date {
+            color: white;
+        }
+
+        .data.link {
+            color: black;
+        }
+
+        .data.visited {
+            color: white;
+        }
+
+        .date:hover {
+            color: white;
+        }
+
+        .data.active {
+            color: white;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+            .switch input {
+                display: none;
+            }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+            .slider:before {
+                position: absolute;
+                content: "";
+                height: 26px;
+                width: 26px;
+                left: 4px;
+                bottom: 4px;
+                background-color: white;
+                -webkit-transition: .4s;
+                transition: .4s;
+            }
+
+        input:checked + .slider {
+            background-color: #009933;
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #009933;
+        }
+
+        input:checked + .slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+        }
+
+        /* Rounded sliders */
+        .slider.round {
+            border-radius: 34px;
+        }
+
+            .slider.round:before {
+                border-radius: 50%;
+            }
+
+
+        .modal-dialog {
+            position: absolute;
+            top: 100px;
+            right: 100px;
+            bottom: 0;
+            left: 0;
+            z-index: 10040;
+            overflow: auto;
+            overflow-y: auto;
+        }
+
+        .schedule {
+            text-align: left;
+            font-size: .66em;
+        }
+    </style>
+    <title>Mammoth Pool Manager</title>
+</head>
+<body >
+    <div id="accordion">
+        <div class="card">
+            <div class="card-header" id="headingOne">
+                <h5 class="mb-0">
+                    <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                        Temperature
+                    </button>
+                    <span class="btn headline" id = "hl_temp"></span>
+                    <span class="btn headline" id = "hl_testmode"></span>
+                </h5>
+            </div>
+            <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+                <div class="card-body">
+                    <button type="button" class="btn btn-primary temp">
+                        Air Temp.
+                        <span class="badge" id="air"></span>
+                    </button>
+                    <button type="button" class="btn btn-primary temp">
+                        Pool Temp.
+                        <span class="badge" id="pool"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header" id="headingTwo">
+                <h5 class="mb-0">
+                    <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                        Pump
+                    </button>
+                    <span class="btn headline" id = "hl_pump"></span>
+                </h5>
+            </div>
+            <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
+                <div class="card-body">
+                    <table style="width:75%">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <label class="switch">
+                                        <input id="pumpOnCheck" type="checkbox">
+                                        <span class="slider round"></span>
+                                    </label>
+                                    <div>
+                                        <span class="placard">ON</span>
+                                    </div>
+                                </td>
+                                <td style="padding-left: 60px">
+                                    <label class="switch">
+                                        <input id="pumpAutoCheck" type="checkbox">
+                                        <span class="slider round"></span>
+                                    </label>
+                                    <div>
+                                        <span class="placard">Auto</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <table class="table table-sm" style="width:25%">
+                        <thead class="thead-dark">
+                            <tr style="text-align:center; font-size:.66em">
+                                <th><button value='0' style="font-size:.85em" class="btn btn-dark sched-btn" data-toggle="modal" data-target="#dateModal">S</button></th>
+                                <th><button value='1' style="font-size:.85em" class="btn btn-dark sched-btn" data-toggle="modal" data-target="#dateModal">M</button></th>
+                                <th><button value='2' style="font-size:.85em" class="btn btn-dark sched-btn" data-toggle="modal" data-target="#dateModal">T</button></th>
+                                <th><button value='3' style="font-size:.85em" class="btn btn-dark sched-btn" data-toggle="modal" data-target="#dateModal">W</button></th>
+                                <th><button value='4' style="font-size:.85em" class="btn btn-dark sched-btn" data-toggle="modal" data-target="#dateModal">T</button></th>
+                                <th><button value='5' style="font-size:.85em" class="btn btn-dark sched-btn" data-toggle="modal" data-target="#dateModal">F</button></th>
+                                <th><button value='6' style="font-size:.85em" class="btn btn-dark sched-btn" data-toggle="modal" data-target="#dateModal">S</button></th>
+                            <tr>
+                        </thead>
+                        <tbody>
+                            <tr value="pump" id="pumpTime" class="schedule" style="text-align:left; font-size:.66em"></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header" id="headingThree">
+                <h5 class="mb-0">
+                    <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                        Pool Lights
+                    </button>
+                    <span class="btn headline" id = "hl_lights"></span>
+                </h5>
+            </div>
+            <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordion">
+                <div class="card-body">
+                    <table>
+                        <tbody>
+                            <tr style="vertical-align:top; padding: 12px">
+                                <td>
+                                    <label class="switch">
+                                        <input id="lightOnCheck" type="checkbox">
+                                        <span class="slider round"></span>
+                                    </label>
+                                    <div>
+                                        <span class="placard">ON</span>
+                                    </div>
+                                </td>
+                                <td style="text-align:left; padding-left: 25px">
+                                    <div class="dropdown" style="text-align:left">
+                                        <button value="1" type="button" id="lightSequence" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" disabled></button>
+                                        <div id="lightSequenceList" class="dropdown-menu">
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="text-align:left; padding-left: 25px">
+                                    <label class="switch">
+                                        <input id="lightAutoCheck" type="checkbox">
+                                        <span class="slider round"></span>
+                                    </label>
+                                    <div>
+                                        <span class="placard">Auto</span>
+                                    </div>
+                                </td>
+                                <td style="text-align:left; padding-left: 25px">
+                                    <label class="switch">
+                                        <input id="lightOnDusk" type="checkbox">
+                                        <span class="slider round"></span>
+                                    </label>
+                                    <div>
+                                        <span class="placard">Dusk</span>
+                                    </div>
+                                </td>
+                                <td style="text-align:left; padding-left: 25px">
+                                    <div class="dropdown" style="text-align:left">
+                                        <button value="1" type="button" id="lightsTimer" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" ></button>
+                                        <div id="lightTimes" class="dropdown-menu">
+											<li class ="ltimes" value = "1">1 Hour</li>
+											<li class ="ltimes" value = "2"> 2 Hours</li>
+											<li class ="ltimes" value = "4"> 4 Hours</li>
+											<li class ="ltimes" value = "6"> 6 Hours</li>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <table class="table table-sm" style="width:25%">
+                        <thead class="thead-dark">
+                            <tr style="text-align:center; font-size:.66em">
+                                <th><button value='0' style="font-size:.85em" class="btn btn-dark sched-btn" data-toggle="modal" data-target="#dateModal">S</button></th>
+                                <th><button value='1' style="font-size:.85em" class="btn btn-dark sched-btn" data-toggle="modal" data-target="#dateModal">M</button></th>
+                                <th><button value='2' style="font-size:.85em" class="btn btn-dark sched-btn" data-toggle="modal" data-target="#dateModal">T</button></th>
+                                <th><button value='3' style="font-size:.85em" class="btn btn-dark sched-btn" data-toggle="modal" data-target="#dateModal">W</button></th>
+                                <th><button value='4' style="font-size:.85em" class="btn btn-dark sched-btn" data-toggle="modal" data-target="#dateModal">T</button></th>
+                                <th><button value='5' style="font-size:.85em" class="btn btn-dark sched-btn" data-toggle="modal" data-target="#dateModal">F</button></th>
+                                <th><button value='6' style="font-size:.85em" class="btn btn-dark sched-btn" data-toggle="modal" data-target="#dateModal">S</button></th>
+                            <tr>
+                        </thead>
+                        <tbody>
+                            <tr id="lightTime" value="lights" class="schedule" style="text-align:left; font-size:.66em"></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header" id="headingFour">
+                <h5 class="mb-0">
+                    <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                        Chlorination System
+                    </button>
+					<span class="btn headline" id = "hl_chlor"></span>
+                </h5>
+            </div>
+            <div id="collapseFour" class="collapse" aria-labelledby="headingFour" data-parent="#accordion">
+                <div class="card-body">
+                    <table style="width:25%">
+                        <tbody>
+                            <tr>
+                                <th style="text-align:center">System</th>
+                                <th style="text-align:center">Action</th>
+                                <th style="text-align:center">Copper</th>
+                                <th style="text-align:center">Ion</th>
+                            </tr>
+                            <tr style="vertical-align:top; padding: 12px">
+                                <td style="text-align:center">
+                                    <label class="switch">
+                                        <input id="chlorOnCheck" type="checkbox">
+                                        <span class="slider round"></span>
+                                    </label>
+                                    <div>
+                                        <span class="placard">ON</span>
+                                    </div>
+                                </td>
+                                <td style="text-align:left; padding-left: 25px">
+									<table><tbody><tr><td>
+                                    <div class="btn-group-vertical">
+                                        <button id="btnCopper" type="button" class="btn btn-outline-secondary" disabled>Copper</button>
+                                        <button id="btnIon" type="button" class="btn btn-outline-secondary" disabled>Ionization</button>
+
+                                    </div>
+                                    </td>
+                                    <td>
+                                    <div>
+									<span id = "chlorDir"></span>    
+                                    </div>
+                                    </td>
+                                    </tr></tbody></table>
+                                </td>
+                                <td style="padding-left: 25px">
+                                    <label class="switch">
+                                        <input id="chlorCopperAutoCheck" type="checkbox">
+                                        <span class="slider round"></span>
+                                    </label>
+                                    <div>
+                                        <span class="placard">Auto</span>
+                                    </div>
+                                </td>
+                                <td style="padding-left: 25px">
+                                    <label class="switch">
+                                        <input id="chlorIonAutoCheck" type="checkbox">
+                                        <span class="slider round"></span>
+                                    </label>
+                                    <div>
+                                        <span class="placard">Auto</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <span>Copper</span>
+                    <table class="table table-sm" style="width:25%">
+                        <thead class="thead-dark">
+                            <tr style="text-align:center; font-size:.66em">
+                                <th><button value='0' style="font-size:.85em" class="btn btn-dark sched-btn" data-toggle="modal" data-target="#dateModal">S</button></th>
+                                <th><button value='1' style="font-size:.85em" class="btn btn-dark sched-btn" data-toggle="modal" data-target="#dateModal">M</button></th>
+                                <th><button value='2' style="font-size:.85em" class="btn btn-dark sched-btn" data-toggle="modal" data-target="#dateModal">T</button></th>
+                                <th><button value='3' style="font-size:.85em" class="btn btn-dark sched-btn" data-toggle="modal" data-target="#dateModal">W</button></th>
+                                <th><button value='4' style="font-size:.85em" class="btn btn-dark sched-btn" data-toggle="modal" data-target="#dateModal">T</button></th>
+                                <th><button value='5' style="font-size:.85em" class="btn btn-dark sched-btn" data-toggle="modal" data-target="#dateModal">F</button></th>
+                                <th><button value='6' style="font-size:.85em" class="btn btn-dark sched-btn" data-toggle="modal" data-target="#dateModal">S</button></th>
+                            <tr>
+                        </thead>
+                        <tbody>
+                            <tr class="schedule" value="copper" id="copperTime" style="text-align:left; font-size:.66em"></tr>
+                        </tbody>
+                    </table>
+                    <span>Ion</span>
+                    <table class="table table-sm" style="width:25%">
+                        <thead class="thead-dark">
+                            <tr style="text-align:center; font-size:.66em">
+                                <th><button value='0' style="font-size:.85em" class="btn btn-dark sched-btn" data-toggle="modal" data-target="#dateModal">S</button></th>
+                                <th><button value='1' style="font-size:.85em" class="btn btn-dark sched-btn" data-toggle="modal" data-target="#dateModal">M</button></th>
+                                <th><button value='2' style="font-size:.85em" class="btn btn-dark sched-btn" data-toggle="modal" data-target="#dateModal">T</button></th>
+                                <th><button value='3' style="font-size:.85em" class="btn btn-dark sched-btn" data-toggle="modal" data-target="#dateModal">W</button></th>
+                                <th><button value='4' style="font-size:.85em" class="btn btn-dark sched-btn" data-toggle="modal" data-target="#dateModal">T</button></th>
+                                <th><button value='5' style="font-size:.85em" class="btn btn-dark sched-btn" data-toggle="modal" data-target="#dateModal">F</button></th>
+                                <th><button value='6' style="font-size:.85em" class="btn btn-dark sched-btn" data-toggle="modal" data-target="#dateModal">S</button></th>
+                            <tr>
+                        </thead>
+                        <tbody>
+                            <tr class="schedule" style="text-align:left; font-size:.66em" value="ion" id="ionTime"></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="dateModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Set Schedule</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <span>Start Time</span>
+                                    <input type="time" id="begTime">
+                                </td>
+                                <td>
+                                    <span>Stop Time</span>
+                                    <input type="time" id="endTime">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="checkbox" id="allDays">
+                                    <label class="form-check-label">All Days</label>
+                                </td>
+                                <td>
+                                    <input type="checkbox" id="clearDay">
+                                    <label class="form-check-label">Clear Day</label>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnUpdateSchedule" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+<script
+  src="http://code.jquery.com/jquery-3.4.1.js"
+  integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
+  crossorigin="anonymous"></script>
+ <!--   <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script> 
+ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js" integrity="sha384-o+RDsa0aLu++PJvFqy8fFScvbHFLtbvScb8AjopnFD+iEQ7wo/CG0xlczd+2O/em" crossorigin="anonymous"></script>
+   <!-- <script src="/bootstrap-toggle/js/bootstrap-toggle.min.js"></script> -->
+    <script>
+
+        var timeRow = null;
+        var timeColumn = null;
+        var websocket = null;
+        var tempScale = true;
+        var temps = [0.0,0.0];
+        var testMode = "";
+
+        var colors = ["SAm", "Party", "Romance",
+            "Caribbean", "American", "Sunset",
+            "Royal", "Blue", "Green",
+            "Red", "White", "Magenta",
+            "Hold", "Recall"
+        ];
+
+        var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+        var url = ""; /* "http://mammothpool.hopto.org:33269"; */
+
+        $(document).ready(function () {
+            document.addEventListener('visibilitychange',function() {
+                if ((document).visibilityState == 'hidden') {
+                    websocket.close();
+                } else {
+                    connect();
+                }
+            },false);
+            connect();
+            var d = new Date();
+            var timeStamp = d.getHours() + ":" + d.getMinutes();
+
+            addListElement();
+            $('.dropdown-toggle').dropdown();
+            $('#btnCopper').click(setChlor);
+            $('#btnIon').click(setChlor);
+            $('#chlorOnCheck').click(setChlor);
+            $('#chlorCopperAutoCheck').click(setAutoChlor);
+            $('#chlorIonAutoCheck').click(setAutoChlor);
+            $('#pumpAutoCheck').click({ auto: true }, setPump);
+            $('#pumpOnCheck').click({ auto: false }, setPump);
+            $('#btnUpdateSchedule').click(updateSchedule);
+            $('.sched-btn').click(schedBtnClick);
+            $('.ltimes').click(setLightTimer);
+
+            $('#lightOnCheck').click({ slider: 0 }, setLight);            
+            $('#lightAutoCheck').click({ slider: 1 }, setLight);
+            $('#lightOnDusk').click({ slider: 2},setLight);
+            $('.temp').click(function() {
+				tempScale = !tempScale;
+				setTemp();
+			});
+            $('#begTime').prop('value', timeStamp);
+            $('#endTime').prop('value', timeStamp);
+
+        });
+
+        function setUrl(path) {
+            return url + path;
+        };
+        
+        function disconnect() {
+            if (connection.reaadyState == WebSocket.OPEN)
+              connect.close()
+        };
+        
+        function connect() {
+			var headline = "";
+            websocket = new WebSocket("ws://mammothpool.hopto.org:33369/ws2/webclient"); 
+             /*websocket = new WebSocket("ws://192.168.123.200/ws2/webclient"); */
+            websocket.onmessage = function (event) {
+                data = JSON.parse(event.data);
+                switch (data.type) {
+					case 'test':
+						$('#hl_testmode').text( (data.testmode == "1") ? " TEST MODE: ON" : "");
+						break;
+                    case 'time':
+						el = $(document.body).find('.schedule').filter("[value='"+data.id+"']");
+						$(el).html(data.times);
+                        break;
+                    case 'temp':
+						temps[0] = parseFloat(data.atemp);
+						temps[1] = parseFloat(data.ptemp);
+						setTemp();
+                        break;
+                    case 'pump':
+                        if (data.on == "1") {
+                            $('#pumpOnCheck').prop('checked', true);
+                            headline = "ON";
+                        } else {
+                            $('#pumpOnCheck').prop('checked', false);
+                            headline = "OFF";
+                        }
+                        if (data.auto == "1") {
+                            $('#pumpAutoCheck').prop('checked', true);
+                            headline += " AUTO";
+                        } else {
+                            $('#pumpAutoCheck').prop('checked', false);
+                        }
+                        $('#hl_pump').text(headline);
+                        break;
+                    case 'lights':
+                        if (data.on == "1") {
+                            $('#lightOnCheck').prop('checked', true);
+                            $('#lightSequence').prop('disabled', false);
+                            headline = "ON";
+                        } else {
+                            $('#lightOnCheck').prop('checked', false);
+                            $('#lightSequence').prop('disabled', true);
+                            headline = "OFF";
+                        }
+                        if (data.auto == "1") {
+                            $('#lightAutoCheck').prop('checked', true);
+                            headline +=" AUTO";
+                        } else {
+                            $('#lightAutoCheck').prop('checked', false);
+                        }
+                        if (data.duskon == "1") {
+							$('#lightOnDusk').prop('checked',true);
+							$('#lightsTimer').prop('disabled',false);		
+						} else {
+							$('#lightOnDusk').prop('checked',false);
+							$('#lightsTimer').prop('disabled',true);								
+						}
+						$('#lightsTimer').attr('value',data.timer);
+						var timer = $('#lightTimes').find("li[value='"+data.timer+"']").text();
+						$('#lightsTimer').text(timer);
+						
+                        $('#lightSequence').text(colors[parseInt(data.color) - 1]);
+                        $('#lightSequence').attr('value', data.color);
+                        headline += " "+colors[parseInt(data.color) - 1].toUpperCase();
+						if (data.duskon == "1") {
+							$('#lightOnDusk').prop('checked',true);
+							$('#lightsTimer').prop('disabled',false);
+							headline += " DUSK "+ $('#lightsTimer').text().toUpperCase();
+						} else {
+							$('#lightOnDusk').prop('checked',false);
+							$('#lightsTimer').prop('disabled',true);								
+						}
+                        headline += " Dusk Time: "+data.dusktime;                        
+                        $('#hl_lights').text(headline);
+                        break;
+                    case 'chlor':
+                        if (data.on == "1") {
+							headline = "ON";
+                            $('#chlorOnCheck').prop('checked', true);
+                            $('#btnIon').prop('disabled', false);
+                            $('#btnCopper').prop('disabled', false);
+                            if (data.direction == "up") 
+								$('#chlorDir').removeClass('glyphicon glyphicon-arrow-down').addClass('glyphicon glyphicon-arrow-up')
+							else 
+							    $('#chlorDir').removeClass('glyphicon glyphicon-arrow-up').addClass('glyphicon glyphicon-arrow-down')
+                        } else {
+                            $('#btnIon').prop('disabled', true);
+                            $('#btnCopper').prop('disabled', true);
+                            $('#chlorOnCheck').prop('checked', false);
+                            $('#chlorDir').removeClass('glyphicon glyphicon-arrow-up').removeClass('glyphicon glyphicon-arrow-down')
+                            headline = "OFF";
+                        }
+                        if (data.copper == "0") {
+							headline += " COPPER";
+                            $('#btnIon').removeClass('btn btn-success').addClass('btn btn-outline-secondary');
+                            $('#btnCopper').removeClass('btn btn-outline-secondary').addClass('btn btn-success');
+                        } else {
+                            $('#btnCopper').removeClass('btn btn-success').addClass('btn btn-outline-secondary');
+                            $('#btnIon').removeClass('btn btn-outline-secondary').addClass('btn btn-success');
+                            headline +=" IONIZATION";
+                        }
+                        if (data.copperauto == "1") {
+							headline +=" C:AUTO";
+                            $('#chlorCopperAutoCheck').prop('checked', true);
+                        } else {
+                            $('#chlorCopperAutoCheck').prop('checked', false);
+                        }
+                        if (data.ionauto == "1") {
+							headline +=" I:AUTO";
+                            $('#chlorIonAutoCheck').prop('checked', true);
+                        } else {
+                            $('#chlorIonAutoCheck').prop('checked', false);
+                        }
+                        $('#hl_chlor').text(headline);
+                        break;
+                    default:
+                        console.error("unsupported event", data);
+                }
+            };
+        };
+		
+		function setTemp() {
+		var aTemp = (tempScale) ? ((parseFloat(temps[0]) * 9.0 / 5.0 + 32.0).toFixed(1)).toString()+" F"
+												: (parseFloat(temps[0]).toFixed(1)).toString()+" C";
+						var pTemp = (tempScale) ? ((parseFloat(temps[1]) * 9.0 / 5.0 + 32.0).toFixed(1)).toString()+" F"
+												: (parseFloat(temps[1]).toFixed(1)).toString()+" C";
+											
+                        $('#air').text(aTemp);
+                        $('#pool').text(pTemp);
+                        $('#hl_temp').text("A:"+aTemp+" P:"+pTemp)
+		}
+
+
+        function schedBtnClick() {
+            timeRow = $(this).parent().parent().parent().parent().find('tr')
+            timeColumn = parseInt($(this).attr('value'));
+
+            $("#exampleModalLabel").text("Set " + $(timeRow).closest('.schedule').attr("value") + " schedule for " + days[timeColumn]);
+            var td = $(timeRow).find('td')[timeColumn];
+            var times = td.innerHTML.split(" ");
+            var d = new Date();
+            var timeStamp = d.getHours() + ":" + d.getMinutes();
+            $('#begTime').prop('value', (times[0].includes("--")) ? timeStamp : times[0]);
+            $('#endTime').prop('value', (times[1].includes("--")) ? timeStamp : times[1]);
+            $('#clearDay').prop('checked', false);
+            $('#allDays').prop('checked', false);
+        };
+
+        function compareSchedules(beg, days, clearDay, allDays, schedule) {
+            var status = true;
+            if (!clearDay) {
+                status = false;
+                for (var i = 0; i < days.length; i++) {
+                    var td = $(timeRow).find("td")[i + beg];
+                    if (!status)
+                        status = $(td).text() != days[i];
+                }
+                for (var i = 0; i < days.length && status; i++) {
+                    var dTime = days[i].split(" ");
+                    var d = dTime[0].split(":");
+                    var dbd = new Date("2000", "1", "1", d[0], d[1]).getTime();
+                    var d = dTime[1].split(":");
+                    var ded = new Date("2000", "1", "1", d[0], d[1]).getTime();
+                    status = ded > dbd;
+                    if (!status)
+                        alert("End time cannot be before start time.");
+                }
+                if (status && (schedule.includes("ion") || schedule.includes("copper"))) {
+                    var cRow = (schedule.includes("ion")) ? $("#copperTime").find("td") : $("#ionTime").find("td");
+                    for (var i = 0; i < days.length && status; i++) {
+                        var td = cRow[i + beg];
+                        if (!$(td).text().includes("--")) {
+                            var dTime = days[i].split(" ");
+                            var d = dTime[0].split(":");
+                            var dbd = new Date("2000", "1", "1", d[0], d[1]).getTime();
+                            d = dTime[1].split(":");
+                            var ded = new Date("2000", "1", "1", d[0], d[1]).getTime();
+                            dTime = $(td).text().split(" ");
+                            d = dTime[0].split(":");
+                            var ebd = new Date("2000", "1", "1", d[0], d[1]).getTime();
+                            d = dTime[1].split(":");
+                            var eed = new Date("2000", "1", "1", d[0], d[1]).getTime();
+                            status = (ebd < dbd && eed < dbd) || (dbd < ebd && ded < ebd);
+                        }
+                    }
+                    if (!status)
+                        alert("Times for Copper and Ion cannot overlap.");
+                }
+            }
+            return status;
+        };
+
+        function updateSchedule() {
+ 
+            var days = [];
+            var clearDay = $('#clearDay').is(":checked");
+            var allDays = $('#allDays').is(":checked");
+            var start = $('#begTime').prop('value');
+            var stop = $('#endTime').prop('value');
+            var schedule = $(timeRow).closest('.schedule').attr("value");
+            var rows = timeRow.find("td");
+            var name = "schedule";
+            var beg = (allDays) ? 0 : timeColumn;
+            var end = (allDays) ? 6 : timeColumn;
+            var time = "--:-- --:--";
+            var status = false;
+            for (var i = beg; i <= end; i++) {
+                if (!clearDay) {
+                    time = start + " " + stop;
+                }
+                days.push(time);
+            }
+            if (compareSchedules(beg, days, clearDay, allDays, schedule, timeRow)) {
+                for (var i = 0; i < days.length; i++) {
+                    var td = $(timeRow).find("td")[i + beg];
+                    $(td).text(time);
+                }
+                websocket.send(JSON.stringify({ 'action': name, 'name': schedule, 'day': timeColumn,'start':start,'stop':stop,'clear': (clearDay) ? "1" : "0", 'all': (allDays) ? "1" : "0" }));
+            }
+        };
+
+        function setAutoChlor() {
+
+            var name = (this.id == "chlorCopperAutoCheck") ? "copper" : "ion";
+            var mode = (this.checked) ? "1" : "0";
+            websocket.send(JSON.stringify({ 'action': 'chlorauto', 'name': name, 'mode': mode }));
+        };
+
+        function setChlor() {
+
+            var action = "0";
+            var on = "";
+            var name = "pump";
+            var ele = this;
+            on = ($('#chlorOnCheck').is(":checked")) ? "1" : "0";
+            if (on == "1") {
+                var checked = $('#pumpOnCheck').is(":checked");
+                if (!checked) {
+                    $('#chlorOnCheck').prop('checked', false);
+                    $('#btnIon').prop('disabled', true);
+                    $('#btnCopper').prop('disabled', true);
+                    alert("Pump needs to be running");
+                 } else {
+                    if (!ele.className.includes("btn-success")) {
+                        if (ele.id == "chlorOnCheck") {
+                            action = ($('#btnCopper').attr("class").includes("btn-success")) ? "0" : "1";
+                            if (on == "1") {
+                                $('#btnIon').prop('disabled', false);
+                                $('#btnCopper').prop('disabled', false);
+                            } else {
+
+                                $('#btnIon').prop('disabled', true);
+                                $('#btnCopper').prop('disabled', true);
+                            }
+                        } else {
+                            if (!ele.id.includes('btnIon')) {
+                                $('#btnIon').removeClass('btn btn-success').addClass('btn btn-outline-secondary');
+                                $('#btnCopper').removeClass('btn btn-outline-secondary').addClass('btn btn-success');
+                            } else {
+                                $('#btnCopper').removeClass('btn btn-success').addClass('btn btn-outline-secondary');
+                                $('#btnIon').removeClass('btn btn-outline-secondary').addClass('btn btn-success');
+                                action = 1;
+                            }
+                            $('#btnCopper').show();
+                            $('#btnIon').show();
+                        }
+                        name = "chlor";
+                        mode = 0;
+                        websocket.send(JSON.stringify({ 'action': name, 'on': on, 'type': action, 'copperauto': mode, 'ionauto': mode }));
+                    }
+                }
+            } else {
+                $('#btnIon').prop('disabled', true);
+                $('#btnCopper').prop('disabled', true);
+                name = "chlor";
+                on = 0;
+                mode = 0;
+                action = ($('#btnCopper').attr("class").includes("btn-success")) ? "0" : "1";
+                websocket.send(JSON.stringify({ 'action': name, 'on': on, 'type': action, 'copperauto': mode,'ionauto':mode }));
+            }
+        };
+
+
+        function setLight(e) {
+			
+	        var on = ($('#lightOnCheck').is(":checked")) ? "1" : "0";
+	        if (e && e.data.slider == 0) {
+				$('#lightAutoCheck').prop('checked', false);
+				$('#lightOnDusk').prop('checked',false);
+				$('#lightsTimer').prop('disabled',true);
+			}
+			if (on == "1") {
+				$('#lightSequence').prop('disabled', false);
+			} else {
+					$('#lightSequence').prop('disabled', true);
+			}
+            var seq = $('#lightSequence').attr('value');
+            var name = "lights";
+            var mode = ($('#lightAutoCheck').is(":checked")) ? "1" : "0";
+            var dusk = ($('#lightOnDusk').is(":checked")) ? "1" : "0";
+            if (dusk == 1) {
+				$('#lightsTimer').prop('disabled',false);
+			} else {
+				$('#lightsTimer').prop('disabled',true);
+			}
+            var timer = $('#lightsTimer').attr('value');
+            websocket.send(JSON.stringify({ 'action': name, 'on': on, 'seq': seq, 'mode': mode,'duskon':dusk,'timer': timer}));
+        };
+
+        function setPump(e) {
+
+            if (!e.data.auto)
+                $('#pumpAutoCheck').prop('checked', false);
+            var mode = ($('#pumpAutoCheck').is(":checked")) ? "1" : "0";
+            var checked = ($('#pumpOnCheck').is(":checked")) ? "1" : "0";
+            var name = "pump";
+            websocket.send(JSON.stringify({ 'action': 'pump', 'on': checked, 'mode': mode }));
+        };
+
+
+        function fixResponse(resp) {
+            while (resp.includes("\n")) {
+                resp = resp.replace("\n", "");
+            }
+            return resp.split(',');
+        };
+
+		function setLightTimer() {
+			$('#lightsTimer').text($(this).text());
+			$('#lightsTimer').attr('value',$(this).attr('value'));
+			setLight();
+		};
+
+        function setLightSequence(id) {
+
+            var item = $('#' + id);
+            $('#lightSequence').text(item.text());
+            $('#lightSequence').attr('value', item.attr('value'));
+            setLight();
+        }
+
+        function addListElement() {
+
+            for (var i = 0; i < colors.length; i++) {
+                $('#lightSequenceList').append(
+                    $('<li>').attr('value', (i + 1).toString()).append(
+                        $('<a>').attr('id', 'lightSeq_' + (i + 1)).attr('href', '#').attr('value', (i + 1).toString())
+                            .attr('class', 'dropdown-item').attr('onClick', 'setLightSequence("lightSeq_' + (i + 1) + '")').append(colors[i])));
+            };
+        };
+
+    </script>
+</body>
+</html>
